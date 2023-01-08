@@ -12,18 +12,19 @@ path='webdriver/chromedriver.exe'
 def driver_create():
 
     service=Service(path)
-    chrome_options = Options()
+    chrome_options = Options()#açılan web sitede iş bittikten sonra kapanmama hatası olduğu için kullanıldı
     chrome_options.add_experimental_option("detach", True)
     driver=webdriver.Chrome(service=service,options=chrome_options)
     return driver
 
 def General_Info_CSV():
     driver=driver_create()
-    driver.get(website)
+    driver.get(website)#istenilen web site adresine git
 
-    tbody=driver.find_element(By.TAG_NAME, 'tbody')
-    matches=tbody.find_elements(By.TAG_NAME, 'tr')
-
+    tbody=driver.find_element(By.TAG_NAME, 'tbody')#isterleri karşılayan ilk objeyi döndür
+    matches=tbody.find_elements(By.TAG_NAME, 'tr')#isterleri karşılayan objeleri döndür
+    print(type(matches)) # <class 'list'>
+    print(matches) # elemanlar listesi
 
     artist=[]
     title=[]
@@ -32,7 +33,7 @@ def General_Info_CSV():
 
     for match in matches:
         #For artist
-        artistinfo=match.find_element("xpath", './td[2]').text
+        artistinfo=match.find_element("xpath", './td[2]').text#xpath nitelendirmelerde kullanılır (//tbody/tr[3]/td[3]). Bir elementi nitelendirirken kullanılır. indis 1'den başlar.
         #print(artistinfo)#for the sake of debugging
         artist.append(artistinfo)
         #For title
@@ -43,15 +44,16 @@ def General_Info_CSV():
         difficulty.append(difficultyinfo)
         #For link
         linkinfo = match.get_attribute('onclick')
-        linkinfo = linkinfo[19:]
-        linkinfo = linkinfo[:-1]
+        print("all link info:",linkinfo)
+        linkinfo = linkinfo[19:]#link infonun ilk 19 karakterini sil
+        linkinfo = linkinfo[:-1]#link infonun son karakterini sil
         linkinfo=plain + linkinfo
         link.append(linkinfo)
         #print(linkinfo)
         #print(type(linkinfo))
     driver.quit()
     df=pd.DataFrame({'artist':artist,'title':title,'difficulty':difficulty,'link':link})#making datafreame
-    df.to_csv('8notes.csv',index=True)
+    df.to_csv('8notes.csv',index=True)#odevin amacı bu formatta tutmak olmasada önce csv formatında kayıt alındı.
     #df.to_json('8notes.json',index=True)
     #print(df)
     print("csv dosyasi oluşturuldu")
@@ -83,15 +85,15 @@ def JSON_Info(df):
         for aboutinfo1 in aboutinfo:
             aboutinfo2 = aboutinfo1.find_elements(By.TAG_NAME, 'td')
             for aboutinfo3 in aboutinfo2:
-                fullabout = fullabout + aboutinfo3.text
+                fullabout = fullabout + aboutinfo3.text#bulunan her td içerisinde yazı text olarak fullabout'a eklenir
         about.append(fullabout)
 
         #For imagelink
         fullimage=[]#if it has more than 1 photo takes all of their links
         imageinfo=driver.find_elements("xpath",'// main / div / div[ @class ="img-container"]')
         for imagetemp in imageinfo:
-            difficultyinfo = imagetemp.find_element(By.TAG_NAME, "img").get_attribute('src')
-            fullimage.append(difficultyinfo)
+            imagelinkinfo = imagetemp.find_element(By.TAG_NAME, "img").get_attribute('src')
+            fullimage.append(imagelinkinfo)
         imglink.append(fullimage)
         #print(fullimage)
         print("belirtilen web site tamamlandi: ",website)
